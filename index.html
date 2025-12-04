@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Monitor de Agua LoRa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 19.2px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #495057 0%, #212529 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #e9ecef;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        .header {
+            background: #212529;
+            padding: clamp(16px, 2vh, 24px) clamp(20px, 3vw, 32px);
+            border-radius: 10px;
+            border: 1px solid #343a40;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #f8f9fa;
+            font-size: clamp(21.6px, 3vw, 28.8px);
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-buttons {
+            position: absolute;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .button-separator {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 5px;
+        }
+
+        .fullscreen-btn,
+        .download-btn {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid #343a40;
+            border-radius: 8px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 6px;
+            padding: 0 12px;
+        }
+
+        .download-btn {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .fullscreen-btn:hover,
+        .download-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: #495057;
+            transform: translateY(-2px);
+        }
+
+        .download-btn:hover {
+            background: rgba(16, 185, 129, 0.25);
+            border-color: #10b981;
+        }
+
+        .fullscreen-btn svg,
+        .download-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+
+        .fullscreen-btn svg {
+            stroke: #3b82f6;
+        }
+
+        .download-btn svg {
+            stroke: #10b981;
+        }
+
+        .download-btn-text {
+            color: #10b981;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: 1fr 2fr;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .card {
+            background: #212529;
+            padding: clamp(16px, 2vh, 24px);
+            border-radius: 10px;
+            border: 1px solid #343a40;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            border-color: #495057;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: clamp(12px, 2vh, 20px);
+        }
+
+        .card-title {
+            color: #adb5bd;
+            font-size: clamp(32px, 1.44vw, 15.6px);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .card-icon {
+            width: clamp(128px, 4vw, 40px);
+            height: clamp(128px, 4vw, 40px);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(59, 130, 246, 0.15);
+            flex-shrink: 0;
+        }
+
+        .card-icon svg {
+            width: clamp(64px, 2vw, 20px);
+            height: clamp(64px, 2vw, 20px);
+            stroke: #3b82f6;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .card-icon.blue { background: rgba(59, 130, 246, 0.15); }
+        .card-icon.green { background: rgba(16, 185, 129, 0.15); }
+        .card-icon.green svg { stroke: #10b981; }
+        .card-icon.purple { background: rgba(139, 92, 246, 0.15); }
+        .card-icon.purple svg { stroke: #8b5cf6; }
+        .card-icon.red { background: rgba(239, 68, 68, 0.15); }
+        .card-icon.red svg { stroke: #ef4444; }
+
+        .card-value {
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            color: #f8f9fa;
+            margin: clamp(4px, 1vh, 8px) 0;
+            letter-spacing: -0.025em;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .card-unit {
+            color: #6c757d;
+            font-size: clamp(40px, 2.16vw, 19.2px);
+            font-weight: 500;
+            margin-left: 4px;
+        }
+
+        .card-subtitle {
+            color: #6c757d;
+            font-size: clamp(32px, 1.2vw, 14.4px);
+            margin-top: auto;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: clamp(28px, 1.5vh, 12px);
+        }
+
+        .status-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        .status-dot.conectado {
+            background: #10b981;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+
+        .status-dot.desconectado {
+            background: #ef4444;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+        }
+
+        .status-text {
+            color: #adb5bd;
+            font-size: clamp(32px, 1.44vw, 15.6px);
+            font-weight: 500;
+        }
+
+        .charts-section {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .chart-card {
+            background: #212529;
+            padding: clamp(16px, 2.5vh, 28px);
+            border-radius: 10px;
+            border: 1px solid #343a40;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(11px, 2vh, 20px);
+            flex-shrink: 0;
+        }
+
+        .chart-header h2 {
+            color: #f8f9fa;
+            font-size: clamp(32px, 2.4vw, 21.6px);
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .chart-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .chart-value {
+            text-align: right;
+        }
+
+        .chart-value-number {
+            font-size: clamp(50px, 3.6vw, 33.6px);
+            font-weight: 700;
+            color: #3b82f6;
+            line-height: 1;
+        }
+
+        .chart-value-label {
+            font-size: clamp(24px, 1.2vw, 13.2px);
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        #chart-container,
+        #weeklyChart-container {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        @media (max-width: 1200px) {
+            html {
+                font-size: 18px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto auto;
+            }
+
+            .charts-section {
+                grid-column: 1 / -1;
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            html {
+                font-size: 16.8px;
+            }
+
+            .container {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(3, auto) 1fr;
+            }
+
+            .header-buttons {
+                right: 12px;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .fullscreen-btn,
+            .download-btn {
+                height: 36px;
+                padding: 0 10px;
+            }
+
+            .fullscreen-btn svg,
+            .download-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .download-btn-text {
+                font-size: 11px;
+            }
+
+            .button-separator {
+                height: 20px;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Dashboard - Medición de Consumo Hídrico</h1>
+            <!-- Botones en el header -->
+            <div class="header-buttons">
+                <!-- Botón Descarga CSV -->
+                <button class="download-btn" id="downloadBtn" title="Descargar datos en CSV">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                    <span class="download-btn-text">Descargar informe</span>
+                </button>
+
+                <!-- Separador -->
+                <div class="button-separator"></div>
+
+                <!-- Botón Pantalla Completa -->
+                <button class="fullscreen-btn" id="fullscreenBtn" title="Pantalla completa">
+                    <svg viewBox="0 0 24 24" id="fullscreenIcon">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Consumo Total -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Consumo Total</div>
+                    <div class="card-icon blue">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-value">
+                    <span id="consumoValue">--</span>
+                    <span class="card-unit">L</span>
+                </div>
+                <div class="card-subtitle">Desde la instalación</div>
+            </div>
+
+            <!-- RSSI -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">RSSI Gateway LoRa</div>
+                    <div class="card-icon purple">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                            <circle cx="12" cy="20" r="1"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-value">
+                    <span id="rssiValue">--</span>
+                    <span class="card-unit">dBm</span>
+                </div>
+                <div class="card-subtitle" id="rssiQuality">Evaluando calidad...</div>
+            </div>
+
+            <!-- Estado de Conexión -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Estado del Sistema</div>
+                    <div class="card-icon" id="conexionIcon">
+                        <svg viewBox="0 0 24 24">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-value" style="font-size: clamp(36px, 6vw, 48px);" id="conexionText">
+                    --
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <div class="status-text" id="statusText">Verificando...</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <!-- Gráfico de Barras - Consumo Semanal -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2>Consumo Semanal</h2>
+                    </div>
+                    <div id="weeklyChart-container">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Línea - Historial de Flujo -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2>Historial de Flujo</h2>
+                        <div class="chart-info">
+                            <div class="chart-value">
+                                <div class="chart-value-number">
+                                    <span id="flujoChartValue">--</span>
+                                </div>
+                                <div class="chart-value-label">Flujo Actual (L/min)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="chart-container">
+                        <canvas id="flowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        // ============ CONFIGURACIÓN FIREBASE ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9CV849RYPE4BqKBzwPlPIipiw1Wz5Tag",
+            authDomain: "TU_PROYECTO.firebaseapp.com",
+            databaseURL: "https://heltec-read-default-rtdb.firebaseio.com/",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_PROYECTO.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "TU_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const datosRef = database.ref('/datos');
+
+        // Variables para los gráficos
+        let flowChart, weeklyChart;
+        const maxDataPoints = 20;
+        
+        const chartData = {
+            labels: [],
+            datasets: [{
+                label: 'Flujo (L/min)',
+                data: [],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#212529',
+                pointBorderWidth: 2,
+                pointHoverBackgroundColor: '#3b82f6',
+                pointHoverBorderColor: '#f8f9fa',
+                pointHoverBorderWidth: 2
+            }]
+        };
+
+        const weeklyData = {
+            labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+            datasets: [{
+                label: 'Consumo (L)',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(59, 130, 246, 0.6)'
+                ],
+                borderColor: [
+                    '#3b82f6',
+                    '#8b5cf6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#ec4891',
+                    '#3b82f6'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                hoverBackgroundColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(236, 72, 153, 1)',
+                    'rgba(59, 130, 246, 0.8)'
+                ]
+            }]
+        };
+
+        let allData = [];
+
+        // ============ FUNCIONALIDAD PANTALLA COMPLETA ============
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = document.getElementById('fullscreenIcon');
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function updateFullscreenIcon() {
+            if (document.fullscreenElement) {
+                fullscreenIcon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>';
+            } else {
+                fullscreenIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+            }
+        }
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+        // ============ FUNCIONALIDAD DESCARGA CSV ============
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        function downloadCSV() {
+            if (allData.length === 0) {
+                alert('No hay datos para descargar aún');
+                return;
+            }
+
+            const headers = ['Fecha', 'Hora', 'Flujo (L/min)', 'Consumo Total (L)', 'RSSI (dBm)', 'Conexión'];
+            
+            const rows = allData.map(item => [
+                item.fecha,
+                item.hora,
+                item.flujo,
+                item.consumoTotal,
+                item.rssi,
+                item.conexion
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + 
+                            now.toTimeString().split(' ')[0].replace(/:/g, '-');
+            const filename = `Reporte_Consumo_Hidrico_${timestamp}.csv`;
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            console.log(`CSV descargado: ${filename}`);
+        }
+
+        downloadBtn.addEventListener('click', downloadCSV);
+
+        // ============ INICIALIZAR GRÁFICOS ============
+        function initCharts() {
+            // Gráfico de línea - Flujo
+            const flowCanvas = document.getElementById('flowChart');
+            if (flowCanvas) {
+                const ctx = flowCanvas.getContext('2d');
+                flowChart = new Chart(ctx, {
+                    type: 'line',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 800,
+                            easing: 'easeInOutQuart'
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#212529',
+                                titleColor: '#f8f9fa',
+                                bodyColor: '#dee2e6',
+                                borderColor: '#495057',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: false,
+                                caretPadding: 10,
+                                callbacks: {
+                                    label: (context) => `${context.parsed.y.toFixed(2)} L/min`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#343a40', drawBorder: false },
+                                ticks: { color: '#6c757d', font: { size: 28 }, padding: 8 },
+                                title: { display: true, text: 'L/min', color: '#adb5bd', font: { size: 24, weight: 500 } }
+                            },
+                            x: {
+                                grid: { color: '#343a40', drawBorder: false },
+                                ticks: { color: '#6c757d', font: { size: 32 }, maxRotation: 0, padding: 8 }
+                            }
+                        },
+                        interaction: { intersect: false, mode: 'index' }
+                    }
+                });
+            }
+
+            // Gráfico de barras - Consumo Semanal
+            const weeklyCanvas = document.getElementById('weeklyChart');
+            if (weeklyCanvas) {
+                const ctx = weeklyCanvas.getContext('2d');
+                weeklyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: weeklyData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 800,
+                            easing: 'easeInOutQuart'
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#212529',
+                                titleColor: '#f8f9fa',
+                                bodyColor: '#dee2e6',
+                                borderColor: '#495057',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: false,
+                                caretPadding: 10,
+                                callbacks: {
+                                    label: (context) => `${context.parsed.y.toFixed(2)} L`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#343a40', drawBorder: false },
+                                ticks: { color: '#6c757d', font: { size: 28 }, padding: 8 },
+                                title: { display: true, text: 'Consumo (L)', color: '#adb5bd', font: { size: 24, weight: 500 } }
+                            },
+                            x: {
+                                grid: { display: false, drawBorder: false },
+                                ticks: { color: '#6c757d', font: { size: 24 }, maxRotation: 0, padding: 8 }
+                            }
+                        },
+                        interaction: { intersect: false, mode: 'index' }
+                    }
+                });
+            }
+
+            console.log('Gráficos inicializados correctamente');
+        }
+
+        // ============ ACTUALIZAR GRÁFICOS ============
+        function updateFlowChart(flujo) {
+            if (!flowChart) return;
+
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+            chartData.labels.push(timeLabel);
+            chartData.datasets[0].data.push(flujo);
+
+            if (chartData.labels.length > maxDataPoints) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
+            }
+
+            flowChart.update();
+        }
+
+        function updateWeeklyChart(datosConsulta) {
+            if (!weeklyChart) return;
+
+            weeklyData.datasets[0].data = [
+                datosConsulta.ConsumoLLunes || 0,
+                datosConsulta.ConsumoMartes || 0,
+                datosConsulta.ConsumoMiercoles || 0,
+                datosConsulta.ConsumoJueves || 0,
+                datosConsulta.ConsumoViernes || 0,
+                datosConsulta.ConsumoSabado || 0,
+                datosConsulta.ConsumoTDomingo || 0
+            ];
+
+            weeklyChart.update();
+        }
+
+        // ============ EVALUAR RSSI ============
+        function evaluarRSSI(rssi) {
+            if (rssi >= -50) return { text: 'Excelente', color: '#10b981' };
+            if (rssi >= -70) return { text: 'Buena', color: '#3b82f6' };
+            if (rssi >= -90) return { text: 'Regular', color: '#f59e0b' };
+            return { text: 'Débil', color: '#ef4444' };
+        }
+
+        // ============ ESCUCHAR FIREBASE ============
+        datosRef.on('value', (snapshot) => {
+            const datos = snapshot.val();
+            
+            if (datos) {
+                // Actualizar cards
+                document.getElementById('flujoChartValue').textContent = datos.flujo.toFixed(2);
+                document.getElementById('consumoValue').textContent = datos.consumoTotal.toFixed(2);
+                
+                document.getElementById('rssiValue').textContent = datos.rssi;
+                const rssiInfo = evaluarRSSI(datos.rssi);
+                const rssiQuality = document.getElementById('rssiQuality');
+                rssiQuality.textContent = `Calidad: ${rssiInfo.text}`;
+                rssiQuality.style.color = rssiInfo.color;
+
+                // Actualizar conexión
+                const conexionIcon = document.getElementById('conexionIcon');
+                const conexionText = document.getElementById('conexionText');
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                
+                let conexionEstado = 'Desconectado';
+                if (datos.conexionActiva) {
+                    conexionIcon.className = 'card-icon green';
+                    conexionText.textContent = 'Conectado';
+                    conexionText.style.color = '#10b981';
+                    statusDot.className = 'status-dot conectado';
+                    statusText.textContent = 'Transmisor activo';
+                    conexionEstado = 'Conectado';
+                } else {
+                    conexionIcon.className = 'card-icon red';
+                    conexionText.textContent = 'Desconectado';
+                    conexionText.style.color = '#ef4444';
+                    statusDot.className = 'status-dot desconectado';
+                    statusText.textContent = 'Sin señal del transmisor';
+                }
+
+                // Crear fecha y hora
+                const now = new Date();
+                const fecha = now.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+                const hora = now.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                allData.push({
+                    fecha: fecha,
+                    hora: hora,
+                    flujo: datos.flujo.toFixed(2),
+                    consumoTotal: datos.consumoTotal.toFixed(2),
+                    rssi: datos.rssi,
+                    conexion: conexionEstado
+                });
+
+                // Actualizar gráficos
+                updateFlowChart(datos.flujo);
+                updateWeeklyChart(datos);
+            }
+        });
+
+        // ============ INICIALIZAR AL CARGAR ============
+        window.addEventListener('load', () => {
+            console.log('Página cargada, inicializando...');
+            initCharts();
+        });
+    </script>
+</body>
+</html>
