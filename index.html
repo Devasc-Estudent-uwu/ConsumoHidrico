@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Monitor de Agua LoRa</title>
+    <title>Dashboard - Control y Monitoreo</title>
     <style>
         * {
             margin: 0;
@@ -29,6 +29,7 @@
             flex-direction: column;
             padding: 1rem;
             gap: 1rem;
+            min-height: 0;
         }
 
         .header {
@@ -41,6 +42,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 0;
         }
 
         .header h1 {
@@ -80,6 +82,7 @@
             transition: all 0.3s ease;
             gap: 6px;
             padding: 0 12px;
+            flex-shrink: 0;
         }
 
         .download-btn {
@@ -142,6 +145,8 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
+            min-height: 0;
+            min-width: 0;
         }
 
         .card:hover {
@@ -155,6 +160,7 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: clamp(12px, 2vh, 20px);
+            min-width: 0;
         }
 
         .card-title {
@@ -202,6 +208,7 @@
             display: flex;
             align-items: center;
             line-height: 1;
+            min-height: 0;
         }
 
         .card-unit {
@@ -213,8 +220,8 @@
 
         .card-subtitle {
             color: #6c757d;
-            font-size: clamp(32px, 1.2vw, 14.4px);
-            margin-top: auto;
+            font-size: clamp(25px, 1.2vw, 14.4px);
+            margin-top: 20px;
         }
 
         .status-indicator {
@@ -243,15 +250,9 @@
         }
 
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            50% {
-                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
         }
 
         .status-text {
@@ -268,7 +269,8 @@
             min-height: 0;
         }
 
-        .chart-card {
+        .chart-card,
+        .control-card {
             background: #212529;
             padding: clamp(16px, 2.5vh, 28px);
             border-radius: 10px;
@@ -276,9 +278,11 @@
             display: flex;
             flex-direction: column;
             min-height: 0;
+            min-width: 0;
         }
 
-        .chart-header {
+        .chart-header,
+        .control-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -286,7 +290,8 @@
             flex-shrink: 0;
         }
 
-        .chart-header h2 {
+        .chart-header h2,
+        .control-header h2 {
             color: #f8f9fa;
             font-size: clamp(32px, 2.4vw, 21.6px);
             font-weight: 600;
@@ -318,11 +323,122 @@
             margin-top: 4px;
         }
 
-        #chart-container,
-        #weeklyChart-container {
+        #chart-container {
             flex: 1;
             position: relative;
             min-height: 0;
+        }
+
+        .control-grid {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .control-block {
+            background: #1d2227;
+            border: 1px solid #343a40;
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-block-title {
+            color: #adb5bd;
+            font-size: clamp(32px, 1.44vw, 15.6px);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .65rem 0;
+            border-bottom: 1px solid #2c2f33;
+            gap: 1rem;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .row-label {
+            color: #adb5bd;
+            font-size: clamp(28px, 1.1vw, 14px);
+            line-height: 1.2;
+        }
+
+        .switch {
+            position: relative;
+            width: 52px;
+            height: 30px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #343a40;
+            border-radius: 999px;
+            transition: background .50s;
+        }
+
+        .slider::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 4px;
+            top: 4px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform .25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,.3);
+        }
+
+        .switch input:checked + .slider {
+            background: #10b981;
+        }
+
+        .switch input:checked + .slider::before {
+            transform: translateX(24px);
+        }
+
+        .btn-factura {
+            width: 100%;
+            padding: .85rem;
+            background: rgba(139, 92, 246, .15);
+            border: 1px solid rgba(139, 92, 246, .4);
+            border-radius: 8px;
+            color: #a78bfa;
+            font-size: clamp(28px, 1vw, 13px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-factura:hover {
+            background: rgba(139, 92, 246, .25);
+            border-color: #8b5cf6;
+        }
+
+        .note {
+            font-size: clamp(24px, .9vw, 12px);
+            color: #6c757d;
+            margin-top: .25rem;
         }
 
         canvas {
@@ -331,9 +447,7 @@
         }
 
         @media (max-width: 1200px) {
-            html {
-                font-size: 18px;
-            }
+            html { font-size: 18px; }
 
             .main-content {
                 grid-template-columns: 1fr 1fr;
@@ -347,18 +461,23 @@
         }
 
         @media (max-width: 768px) {
-            html {
-                font-size: 16.8px;
+            html { font-size: 16.8px; }
+
+            body {
+                overflow: auto;
             }
 
             .container {
+                height: auto;
+                min-height: 100vh;
                 padding: 0.75rem;
                 gap: 0.75rem;
             }
 
             .main-content {
                 grid-template-columns: 1fr;
-                grid-template-rows: repeat(3, auto) 1fr;
+                grid-template-rows: repeat(3, auto) auto;
+                overflow: visible;
             }
 
             .header-buttons {
@@ -390,45 +509,41 @@
             .charts-section {
                 grid-template-columns: 1fr;
             }
+
+            .row {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>Dashboard - Medición de Consumo Hídrico</h1>
-            <!-- Botones en el header -->
             <div class="header-buttons">
-                <!-- Botón Descarga CSV -->
                 <button class="download-btn" id="downloadBtn" title="Descargar datos en CSV">
                     <svg viewBox="0 0 24 24">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
                     </svg>
                     <span class="download-btn-text">Descargar informe</span>
                 </button>
-
-                <!-- Separador -->
                 <div class="button-separator"></div>
-
-                <!-- Botón Pantalla Completa -->
                 <button class="fullscreen-btn" id="fullscreenBtn" title="Pantalla completa">
                     <svg viewBox="0 0 24 24" id="fullscreenIcon">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
                     </svg>
                 </button>
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Consumo Total -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Consumo Total</div>
                     <div class="card-icon blue">
                         <svg viewBox="0 0 24 24">
-                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                         </svg>
                     </div>
                 </div>
@@ -439,16 +554,15 @@
                 <div class="card-subtitle">Desde la instalación</div>
             </div>
 
-            <!-- RSSI -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">RSSI Gateway LoRa</div>
                     <div class="card-icon purple">
                         <svg viewBox="0 0 24 24">
-                            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-                            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-                            <circle cx="12" cy="20" r="1"/>
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                            <circle cx="12" cy="20" r="1"></circle>
                         </svg>
                     </div>
                 </div>
@@ -459,38 +573,48 @@
                 <div class="card-subtitle" id="rssiQuality">Evaluando calidad...</div>
             </div>
 
-            <!-- Estado de Conexión -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Estado del Sistema</div>
                     <div class="card-icon" id="conexionIcon">
                         <svg viewBox="0 0 24 24">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                         </svg>
                     </div>
                 </div>
-                <div class="card-value" style="font-size: clamp(36px, 6vw, 48px);" id="conexionText">
-                    --
-                </div>
+                <div class="card-value" style="font-size: clamp(36px, 6vw, 48px);" id="conexionText">--</div>
                 <div class="status-indicator">
                     <div class="status-dot" id="statusDot"></div>
                     <div class="status-text" id="statusText">Verificando...</div>
                 </div>
             </div>
 
-            <!-- Charts Section -->
             <div class="charts-section">
-                <!-- Gráfico de Barras - Consumo Semanal -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h2>Consumo Semanal</h2>
+                <div class="control-card">
+                    <div class="control-header">
+                        <h2>Panel de Control</h2>
                     </div>
-                    <div id="weeklyChart-container">
-                        <canvas id="weeklyChart"></canvas>
+                    <div class="control-grid">
+                        <div class="control-block">
+                            <div class="control-block-title">Corte del servicio</div>
+                            <div class="row">
+                                <span class="row-label">Accionamiento</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="relay-toggle" />
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="control-block">
+                            <div class="control-block-title">Notificaciones</div>
+                            <div class="row" style="flex-direction:column;align-items:stretch;gap:.6rem;border-bottom:none;">
+                                <button class="btn-factura" id="btn-factura">Enviar correo de facturación</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Gráfico de Línea - Historial de Flujo -->
                 <div class="chart-card">
                     <div class="chart-header">
                         <h2>Historial de Flujo</h2>
@@ -511,33 +635,45 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- Chart.js -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <script>
-        // ============ CONFIGURACIÓN FIREBASE ============
-        const firebaseConfig = {
+        const firebaseConfigMonitoreo = {
             apiKey: "AIzaSyB9CV849RYPE4BqKBzwPlPIipiw1Wz5Tag",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
+            authDomain: "TU_PROYECTO_MONITOREO.firebaseapp.com",
             databaseURL: "https://heltec-read-default-rtdb.firebaseio.com/",
-            projectId: "TU_PROYECTO",
-            storageBucket: "TU_PROYECTO.appspot.com",
+            projectId: "TU_PROYECTO_MONITOREO",
+            storageBucket: "TU_PROYECTO_MONITOREO.appspot.com",
             messagingSenderId: "123456789",
-            appId: "TU_APP_ID"
+            appId: "TU_APP_ID_MONITOREO"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const datosRef = database.ref('/datos');
+        const firebaseConfigControl = {
+            apiKey: "AIzaSyBeXR9-IHVIMwP0lZdVNj6Ml4JPeMAvDPI",
+            authDomain: "TU_PROYECTO_CONTROL.firebaseapp.com",
+            databaseURL: "https://heltec-write-default-rtdb.firebaseio.com",
+            projectId: "TU_PROYECTO_CONTROL",
+            storageBucket: "TU_PROYECTO_CONTROL.appspot.com",
+            messagingSenderId: "987654321",
+            appId: "TU_APP_ID_CONTROL"
+        };
 
-        // Variables para los gráficos
-        let flowChart, weeklyChart;
+        const appMonitoreo = firebase.initializeApp(firebaseConfigMonitoreo, 'monitoreo');
+        const appControl = firebase.initializeApp(firebaseConfigControl, 'control');
+
+        const databaseMonitoreo = appMonitoreo.database();
+        const databaseControl = appControl.database();
+
+        const datosRef = databaseMonitoreo.ref('/datos');
+        const refComando = databaseControl.ref('/rele/comando');
+        const refFacturacion = databaseControl.ref('/correo/facturacion');
+
+        let flowChart;
+        let weeklyChart;
         const maxDataPoints = 20;
-        
+
         const chartData = {
             labels: [],
             datasets: [{
@@ -598,15 +734,12 @@
 
         let allData = [];
 
-        // ============ FUNCIONALIDAD PANTALLA COMPLETA ============
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const fullscreenIcon = document.getElementById('fullscreenIcon');
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => console.error(`Error: ${err.message}`));
             } else {
                 document.exitFullscreen();
             }
@@ -614,16 +747,15 @@
 
         function updateFullscreenIcon() {
             if (document.fullscreenElement) {
-                fullscreenIcon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>';
+                fullscreenIcon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
             } else {
-                fullscreenIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+                fullscreenIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
             }
         }
 
         fullscreenBtn.addEventListener('click', toggleFullscreen);
         document.addEventListener('fullscreenchange', updateFullscreenIcon);
 
-        // ============ FUNCIONALIDAD DESCARGA CSV ============
         const downloadBtn = document.getElementById('downloadBtn');
 
         function downloadCSV() {
@@ -633,7 +765,6 @@
             }
 
             const headers = ['Fecha', 'Hora', 'Flujo (L/min)', 'Consumo Total (L)', 'RSSI (dBm)', 'Conexión'];
-            
             const rows = allData.map(item => [
                 item.fecha,
                 item.hora,
@@ -653,8 +784,7 @@
             const url = URL.createObjectURL(blob);
 
             const now = new Date();
-            const timestamp = now.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + 
-                            now.toTimeString().split(' ')[0].replace(/:/g, '-');
+            const timestamp = now.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + now.toTimeString().split(' ')[0].replace(/:/g, '-');
             const filename = `Reporte_Consumo_Hidrico_${timestamp}.csv`;
 
             link.setAttribute('href', url);
@@ -664,15 +794,11 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            console.log(`CSV descargado: ${filename}`);
         }
 
         downloadBtn.addEventListener('click', downloadCSV);
 
-        // ============ INICIALIZAR GRÁFICOS ============
         function initCharts() {
-            // Gráfico de línea - Flujo
             const flowCanvas = document.getElementById('flowChart');
             if (flowCanvas) {
                 const ctx = flowCanvas.getContext('2d');
@@ -682,10 +808,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: {
-                            duration: 800,
-                            easing: 'easeInOutQuart'
-                        },
+                        animation: { duration: 800, easing: 'easeInOutQuart' },
                         plugins: {
                             legend: { display: false },
                             tooltip: {
@@ -719,7 +842,6 @@
                 });
             }
 
-            // Gráfico de barras - Consumo Semanal
             const weeklyCanvas = document.getElementById('weeklyChart');
             if (weeklyCanvas) {
                 const ctx = weeklyCanvas.getContext('2d');
@@ -729,10 +851,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: {
-                            duration: 800,
-                            easing: 'easeInOutQuart'
-                        },
+                        animation: { duration: 800, easing: 'easeInOutQuart' },
                         plugins: {
                             legend: { display: false },
                             tooltip: {
@@ -765,11 +884,8 @@
                     }
                 });
             }
-
-            console.log('Gráficos inicializados correctamente');
         }
 
-        // ============ ACTUALIZAR GRÁFICOS ============
         function updateFlowChart(flujo) {
             if (!flowChart) return;
 
@@ -803,7 +919,6 @@
             weeklyChart.update();
         }
 
-        // ============ EVALUAR RSSI ============
         function evaluarRSSI(rssi) {
             if (rssi >= -50) return { text: 'Excelente', color: '#10b981' };
             if (rssi >= -70) return { text: 'Buena', color: '#3b82f6' };
@@ -811,27 +926,37 @@
             return { text: 'Débil', color: '#ef4444' };
         }
 
-        // ============ ESCUCHAR FIREBASE ============
+        function conectarControles() {
+            const toggle = document.getElementById('relay-toggle');
+            const btnFactura = document.getElementById('btn-factura');
+
+            toggle.addEventListener('change', function () {
+                refComando.set(toggle.checked ? 1 : 0);
+            });
+
+            btnFactura.addEventListener('click', function () {
+                refFacturacion.set(1);
+            });
+        }
+
         datosRef.on('value', (snapshot) => {
             const datos = snapshot.val();
-            
+
             if (datos) {
-                // Actualizar cards
-                document.getElementById('flujoChartValue').textContent = datos.flujo.toFixed(2);
-                document.getElementById('consumoValue').textContent = datos.consumoTotal.toFixed(2);
-                
+                document.getElementById('flujoChartValue').textContent = Number(datos.flujo || 0).toFixed(2);
+                document.getElementById('consumoValue').textContent = Number(datos.consumoTotal || 0).toFixed(2);
+
                 document.getElementById('rssiValue').textContent = datos.rssi;
                 const rssiInfo = evaluarRSSI(datos.rssi);
                 const rssiQuality = document.getElementById('rssiQuality');
                 rssiQuality.textContent = `Calidad: ${rssiInfo.text}`;
                 rssiQuality.style.color = rssiInfo.color;
 
-                // Actualizar conexión
                 const conexionIcon = document.getElementById('conexionIcon');
                 const conexionText = document.getElementById('conexionText');
                 const statusDot = document.getElementById('statusDot');
                 const statusText = document.getElementById('statusText');
-                
+
                 let conexionEstado = 'Desconectado';
                 if (datos.conexionActiva) {
                     conexionIcon.className = 'card-icon green';
@@ -848,7 +973,6 @@
                     statusText.textContent = 'Sin señal del transmisor';
                 }
 
-                // Crear fecha y hora
                 const now = new Date();
                 const fecha = now.toLocaleDateString('es-ES', {
                     year: 'numeric',
@@ -863,23 +987,22 @@
                 allData.push({
                     fecha: fecha,
                     hora: hora,
-                    flujo: datos.flujo.toFixed(2),
-                    consumoTotal: datos.consumoTotal.toFixed(2),
-                    rssi: datos.rssi,
+                    flujo: Number(datos.flujo || 0).toFixed(2),
+                    consumoTotal: Number(datos.consumoTotal || 0).toFixed(2),
+                    rssi: datos.rssi ?? 0,
                     conexion: conexionEstado
                 });
 
-                // Actualizar gráficos
-                updateFlowChart(datos.flujo);
+                updateFlowChart(Number(datos.flujo || 0));
                 updateWeeklyChart(datos);
             }
         });
 
-        // ============ INICIALIZAR AL CARGAR ============
         window.addEventListener('load', () => {
-            console.log('Página cargada, inicializando...');
             initCharts();
+            conectarControles();
         });
     </script>
 </body>
 </html>
+
